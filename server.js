@@ -1,80 +1,105 @@
-const express = require('express')
-require("dotenv").config()
+const express = require('express');
+require("dotenv").config();
 
-const pool = require("./src/db/pool")
+const pool = require("./src/db/pool");
 
-const app = express()
+const app = express();
 
-app.set("json spaces", 2)
+// Pretty-print JSON in responses
+app.set("json spaces", 2);
 
+// Serve static files (your transactions.html, etc.)
 app.use(express.static("public"));
 
-app.get('/', (req, res) =>  {
-    res.send('Hello from express')
-})
-
-app.get('/about', (req, res) =>{
-    res.send('Hello from about page')
-})
-
-app.get("/health/db", async (req, res) => {
-  const r = await pool.query("SELECT 1 AS ok");
-  res.json(r.rows[0]);
+// Simple routes
+app.get('/', (req, res) => {
+  res.send('Hello from express');
 });
 
+app.get('/about', (req, res) => {
+  res.send('Hello from about page');
+});
+
+// Health check for database
+app.get("/health/db", async (req, res) => {
+  try {
+    const r = await pool.query("SELECT 1 AS ok");
+    res.json(r.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// Dashboard summary endpoint
 app.get("/api/dashboard/summary", async (req, res) => {
+  try {
+    const total = await pool.query(
+      "SELECT COALESCE(SUM(amount),0) AS total_spent FROM transactions.transactions"
+    );
 
-    try {
+    const byCategory = await pool.query(
+      `SELECT category, SUM(amount) AS total
+       FROM transactions.transactions
+       GROUP BY category
+       ORDER BY total DESC`
+    );
 
-        const total = await pool.query(
-            "SELECT COALESCE(SUM(amount),0) AS total_spent FROM transactions"
-        )
+    const recent = await pool.query(
+      `SELECT id, amount, category,
+              to_char(txn_date, 'YYYY-MM-DD') AS txn_date,
+              description
+       FROM transactions.transactions
+       ORDER BY txn_date DESC, id DESC
+       LIMIT 5`
+    );
 
-        const byCategory = await pool.query(
-            `SELECT category, SUM(amount) AS total
-             FROM transactions
-             GROUP BY category
-             ORDER BY total DESC`
-        )
+    const totalSpent = Number(total.rows[0].total_spent);
 
-        const recent = await pool.query(
-  `SELECT id, amount, category,
-          to_char(txn_date, 'YYYY-MM-DD') AS txn_date,
-          description
-   FROM transactions
-   ORDER BY txn_date DESC, id DESC
-   LIMIT 5`
-);
+    const spendingByCategory = byCategory.rows.map(r => ({
+      category: r.category,
+      total: Number(r.total),
+    }));
 
-const totalSpent = Number(total.rows[0].total_spent);
+    const recentTransactions = recent.rows.map(r => ({
+      ...r,
+      amount: Number(r.amount),
+    }));
 
-const spendingByCategory = byCategory.rows.map(r => ({
-  category: r.category,
-  total: Number(r.total),
-}));
+    res.json({
+      totalSpent,
+      spendingByCategory,
+      recentTransactions
+    });
 
-const recentTransactions = recent.rows.map(r => ({
-  ...r,
-  amount: Number(r.amount),
-}));
-        res.json({
-            totalSpent: total.rows[0].total_spent,
-            spendingByCategory: byCategory.rows,
-            recentTransactions: recent.rows
-        })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
 
-    } catch (error) {
+// Fetch all transactions endpoint
+app.get("/api/transactions/all", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, amount, category,
+              to_char(txn_date, 'YYYY-MM-DD') AS txn_date,
+              description
+       FROM transactions.transactions
+       ORDER BY txn_date DESC, id DESC`
+    );
 
-        console.error(error)
+    // Return in the structure your frontend expects
+    res.json({ transactions: result.rows });
 
-        res.status(500).json({
-            error: "Database query failed"
-        })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Database query failed" });
+  }
+});
 
-    }
-
-})
-
-app.listen(process.env.PORT || 3000, () => {
-    console.log('The server is running')
-})
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
