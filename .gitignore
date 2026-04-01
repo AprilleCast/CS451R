@@ -1,0 +1,5 @@
+echo "# Node
+node_modules/
+
+# Others
+.env" > .gitignore
