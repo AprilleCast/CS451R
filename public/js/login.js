@@ -57,7 +57,8 @@ async function handleLogin() {
     if (res.success) {
       Auth.setToken(res.data.token);
       Auth.setUser(res.data.user);
-      // dashboard redirect removed
+      window.location.href = "/dashboard.html";
+      
     } else {
       UI.showAlert("alertMsg", res.message || "Login failed.", "error");
     }
