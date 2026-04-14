@@ -7,182 +7,306 @@
 
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
 
   <style>
-    .metric {
-      font-size: 2.2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .subtle {
-      color: #1f3649;
-    }
-    .chip {
-      font-size: 0.85rem;
-      padding: 0.35rem 0.6rem;
-      border-radius: 999px;
-      background: #cae2fa;
-      color: #2f3d4a;
-      display: inline-block;
-    }
-    .mono {
-      font-variant-numeric: tabular-nums;
-    }
-    :root {
-  --primary-blue: #1e3a8a;
-  --secondary-blue: #3b82f6;
-  --light-blue: #eff6ff;
-  --accent-blue: #2563eb;
-}
+  :root {
+    --primary-blue: #1e3a8a;
+    --secondary-blue: #3b82f6;
+    --light-blue: #eff6ff;
+    --accent-blue: #2563eb;
+    --navy: #0f172a;
+    --muted: #64748b;
+    --soft-bg: #f8fbff;
+  }
 
-body {
-  background: var(--light-blue);
-}
+  body {
+    background: linear-gradient(180deg, #eaf3ff 0%, #f8fbff 45%, #f8fafc 100%);
+    min-height: 100vh;
+  }
 
-.navbar {
-  background-color: var(--primary-blue) !important;
-}
+  .navbar {
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue)) !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.18);
+  }
 
-.card {
-  border: none;
-  border-radius: 12px;
-}
+  .navbar-brand {
+    font-size: 1.2rem;
+    letter-spacing: 0.2px;
+  }
 
-.progress-bar {
-  background-color: var(--secondary-blue);
-}
+  .nav-btn {
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    border: 1px solid rgba(255,255,255,0.45);
+    color: white;
+    transition: 0.2s ease;
+  }
 
-.btn-primary {
-  background-color: var(--secondary-blue);
-  border: none;
-}
+  .nav-btn:hover {
+    background: white;
+    color: var(--primary-blue);
+    border-color: white;
+  }
 
-.btn-primary:hover {
-  background-color: var(--accent-blue);
-}
-  </style>
+  .hero-box {
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(59,130,246,0.12);
+    border-radius: 24px;
+    padding: 1.5rem 1.75rem;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+  }
+
+  .metric {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--navy);
+  }
+
+  .subtle {
+    color: var(--muted);
+  }
+
+  .chip {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    display: inline-block;
+    font-weight: 600;
+  }
+
+  .mono {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card {
+    border: none;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+    background: rgba(255,255,255,0.95);
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    transition: 0.2s ease;
+    box-shadow: 0 14px 36px rgba(37, 99, 235, 0.12);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 1.2rem;
+  }
+
+  .progress {
+    height: 10px !important;
+    border-radius: 999px;
+    background: #e5eefc;
+  }
+
+  .progress-bar {
+    background: linear-gradient(90deg, var(--primary-blue), var(--secondary-blue));
+    border-radius: 999px;
+  }
+
+  .table thead th {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .table tbody td {
+    padding-top: 0.95rem;
+    padding-bottom: 0.95rem;
+    border-color: #eef2f7;
+  }
+
+  .category-pill {
+    display: inline-block;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .amount {
+    font-weight: 700;
+    color: var(--navy);
+  }
+</style>
 </head>
 
 <body class="bg-light">
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark">
+  <nav class="navbar navbar-expand-lg navbar-dark py-3">
   <div class="container">
-    <a class="navbar-brand fw-bold">Budget App</a>
-    <div class="ms-auto">
-      <a href="dashboard.html" class="btn btn-outline-light me-2">
-        Dashboard
-      </a>
-      <a href="transactions.html" class="btn btn-outline-light me-2">
-        Transactions
-      </a>
-      <a href="budgets.html" class="btn btn-outline-light me-2">
-        Budgets
-      </a>
-      <a href="profile.html" class="btn btn-outline-light">
-        Profile
-      </a>
+    <a class="navbar-brand fw-bold"><i class="bi bi-wallet2 me-2"></i>BudgeIt</a>
+    <div class="ms-auto d-flex flex-wrap gap-2">
+      <a href="dashboard.html" class="btn nav-btn">Dashboard</a>
+      <a href="transactions.html" class="btn nav-btn">Transactions</a>
+      <a href="budgets.html" class="btn nav-btn">Budgets</a>
+      <a href="profile.html" class="btn nav-btn">Profile</a>
     </div>
   </div>
 </nav>
 
-  <main class="container py-4">
+  <main class="container py-4" style=" "max-width: 1200px;">
 
     <!-- Header -->
-    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
-      <div>
-        <h1 class="h3 mb-1">Dashboard</h1>
-        <div class="subtle">Track your spending and manage your budget</div>
-      </div>
-      <div class="text-end">
-        <div class="subtle">Last updated</div>
-        <div id="lastUpdated" class="fw-semibold">—</div>
-      </div>
-    </div>
+    <div class="hero-box d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+  <div>
+    <h1 class="h3 mb-1 fw-bold">Dashboard</h1>
+    <div class="subtle">Track your spending and manage your budget</div>
+  </div>
+  <div class="text-end">
+    <div class="subtle">Last updated</div>
+    <div id="lastUpdated" class="fw-semibold">—</div>
+  </div>
+</div>
 
     <!-- Top metrics -->
-    <div class="row g-3 mb-3">
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body">
+    <<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card dashboard-card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
             <div class="subtle">Total Spent</div>
             <div id="totalSpent" class="metric mono">$0.00</div>
-            <div class="subtle mt-2">Sum of all transactions in database</div>
+            <div class="subtle mt-2">Total expenses recorded</div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-cash-stack"></i>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body">
+  <div class="col-md-4">
+    <div class="card dashboard-card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
             <div class="subtle">Top Category</div>
             <div id="topCategory" class="metric">—</div>
             <div id="topCategoryAmount" class="subtle mt-2 mono">$0.00</div>
           </div>
+          <div class="stat-icon">
+            <i class="bi bi-pie-chart"></i>
+          </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="col-md-4">
-        <div class="card shadow-sm">
-          <div class="card-body">
+  <div class="col-md-4">
+    <div class="card dashboard-card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
             <div class="subtle">Transactions Shown</div>
             <div id="txnCount" class="metric mono">0</div>
             <div class="subtle mt-2">Recent transactions displayed below</div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main content -->
-    <div class="row g-3">
-      <!-- Categories -->
-      <div class="col-lg-5">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <h2 class="h5 mb-0">Spending by Category</h2>
-              <span class="chip">Totals</span>
-            </div>
-
-            <div id="categoriesEmpty" class="alert alert-secondary d-none mb-0">
-              No category data yet.
-            </div>
-
-            <div id="categoriesList" class="vstack gap-3"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent transactions -->
-      <div class="col-lg-7">
-        <div class="card shadow-sm h-100">
-          <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <h2 class="h5 mb-0">Recent Transactions</h2>
-              <span class="chip">Last 5</span>
-            </div>
-
-            <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th class="text-end">Amount</th>
-                  </tr>
-                </thead>
-                <tbody id="transactionsBody"></tbody>
-              </table>
-            </div>
-
-            <div id="transactionsEmpty" class="alert alert-secondary d-none mt-3 mb-0">
-              No transactions to display yet.
-            </div>
+          <div class="stat-icon">
+            <i class="bi bi-receipt"></i>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-5">
+    <div class="card dashboard-card h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h2 class="h5 mb-0 fw-bold">Spending by Category</h2>
+            <div class="subtle small">Where most of your money goes</div>
+          </div>
+          <span class="chip"><i class="bi bi-bar-chart me-1"></i>Totals</span>
+        </div>
+
+        <div id="categoriesEmpty" class="alert alert-secondary d-none mb-0">
+          No category data yet.
+        </div>
+
+        <div id="categoriesList" class="vstack gap-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card dashboard-card h-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <h2 class="h5 mb-0 fw-bold">Recent Transactions</h2>
+            <div class="subtle small">Latest spending activity</div>
+          </div>
+          <span class="chip"><i class="bi bi-clock-history me-1"></i>Last 5</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th class="text-end">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsBody"></tbody>
+          </table>
+        </div>
+
+        <div id="transactionsEmpty" class="alert alert-secondary d-none mt-3 mb-0">
+          No transactions to display yet.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card dashboard-card h-100">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Spending Categories</h2>
+        <canvas id="pieChart" style="max-height: 320px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card dashboard-card h-100">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-3">Spending Trend</h2>
+        <canvas id="lineChart" style="max-height: 320px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
 
 
   </main>
@@ -197,11 +321,67 @@ body {
     function safeText(v) {
       return (v === null || v === undefined || v === "") ? "—" : String(v);
     }
+    let pieChartInstance = null;
+  let lineChartInstance = null;
+  function renderPieChart(labels, values) {
+  const ctx = document.getElementById("pieChart");
+
+  if (pieChartInstance) pieChartInstance.destroy();
+
+  pieChartInstance = new Chart(ctx, {
+    type: "pie",
+    data: {
+      labels,
+      datasets: [{
+        data: values
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: "bottom"
+        }
+      }
+    }
+  });
+}
+
+function renderLineChart(labels, values) {
+  const ctx = document.getElementById("lineChart");
+
+  if (lineChartInstance) lineChartInstance.destroy();
+
+  lineChartInstance = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Daily Spending",
+        data: values,
+        fill: false,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
 
     async function loadDashboard() {
       const res = await fetch("/api/dashboard/summary");
       if (!res.ok) throw new Error("Failed to load dashboard data");
       const data = await res.json();
+      const categoryLabels = (data.spendingByCategory ?? []).map(c => c.category);
+const categoryValues = (data.spendingByCategory ?? []).map(c => Number(c.total));
+
+renderPieChart(categoryLabels, categoryValues);
 
       // Top metrics
       document.getElementById("totalSpent").innerText = money(data.totalSpent);
@@ -218,7 +398,7 @@ body {
       // Last updated
       const now = new Date();
       document.getElementById("lastUpdated").innerText =
-        now.toLocaleDateString() + " " + now.toLocaleTimeString();
+  now.toLocaleDateString() + " • " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
       // Categories list with progress bars
       const categoriesWrap = document.getElementById("categoriesList");
@@ -238,14 +418,14 @@ body {
 
           const item = document.createElement("div");
           item.innerHTML = `
-            <div class="d-flex justify-content-between align-items-baseline">
-              <div class="fw-semibold">${safeText(c.category)}</div>
-              <div class="mono">${money(c.total)}</div>
-            </div>
-            <div class="progress" style="height: 10px;">
-              <div class="progress-bar" role="progressbar" style="width: ${pct}%;" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-          `;
+  <div class="d-flex justify-content-between align-items-baseline">
+    <div class="fw-semibold">${safeText(c.category)}</div>
+    <div class="mono">${money(c.total)}</div>
+  </div>
+  <div class="progress" style="height: 10px;">
+    <div class="progress-bar" role="progressbar" style="width: ${pct}%;" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div>
+  </div>
+`;
           categoriesWrap.appendChild(item);
         });
       }
@@ -263,14 +443,23 @@ body {
         txns.forEach(t => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td class="mono">${safeText(t.txn_date)}</td>
-            <td>${safeText(t.category)}</td>
-            <td>${safeText(t.description)}</td>
-            <td class="text-end mono">${money(t.amount)}</td>
-          `;
+  <td class="mono">${safeText(t.txn_date)}</td>
+  <td><span class="category-pill">${safeText(t.category)}</span></td>
+  <td>${safeText(t.description)}</td>
+  <td class="text-end mono amount">${money(t.amount)}</td>
+`;
           tbody.appendChild(tr);
         });
       }
+      const trendRes = await fetch("/api/dashboard/trend");
+if (!trendRes.ok) throw new Error("Failed to load trend data");
+
+const trendData = await trendRes.json();
+
+const trendLabels = trendData.map(t => t.day);
+const trendValues = trendData.map(t => Number(t.total));
+
+renderLineChart(trendLabels, trendValues);
     }
 
     loadDashboard().catch(err => {
