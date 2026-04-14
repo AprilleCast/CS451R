@@ -181,8 +181,14 @@ const Layout = {
     if (themeBtn) themeBtn.addEventListener("click", () => ThemeManager.toggle());
 
     // Logout
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) logoutBtn.addEventListener("click", () => Auth.logout());
+    
+ const logoutBtn = document.querySelector("button#logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    Auth.logout();
+  });
 
     // Mobile sidebar
     const hamburger = document.getElementById("hamburger");
@@ -210,6 +216,12 @@ const Layout = {
       });
       document.addEventListener("click", () => dropdownEl.classList.remove("show"));
     }
+    if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    Auth.logout();
+  });
+}
+
   },
 };
 ThemeManager.init();
