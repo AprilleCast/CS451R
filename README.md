@@ -88,16 +88,29 @@ psql -U postgres
 > - Mac: `psql -U $(whoami) -d postgres` (then create the postgres role)
 > - Windows: Use pgAdmin or `psql -U postgres` (use the password you set during installation)
 
-Then run these commands:
+Then just create the database — **tables are created automatically when the server starts**:
 
 ```sql
--- Create the database
 CREATE DATABASE budget_app;
+```
 
--- Connect to it
-\c budget_app
+Then exit:
+```sql
+\q
+```
 
--- Create the tables
+> **That's it!** The server will automatically create all 4 tables (users, categories, transactions, budgets) and indexes when you run `node server.js`. No manual table creation needed.
+
+<details>
+<summary>📋 Manual table creation (only if auto-create fails)</summary>
+
+If for some reason the auto-create doesn't work, connect to the database and run:
+
+```bash
+psql -U postgres -d budget_app
+```
+
+```sql
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
@@ -148,6 +161,8 @@ Then exit psql:
 ```sql
 \q
 ```
+
+</details>
 
 ### Step 4: Create the `.env` File
 
