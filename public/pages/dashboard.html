@@ -375,7 +375,11 @@ function renderLineChart(labels, values) {
 }
 
     async function loadDashboard() {
-      const res = await fetch("/api/dashboard/summary");
+      const token = localStorage.getItem("token");
+      if (!token) { window.location.href = "/pages/login.html"; return; }
+      const authHeaders = { "Authorization": "Bearer " + token };
+
+      const res = await fetch("/api/dashboard/summary", { headers: authHeaders });
       if (!res.ok) throw new Error("Failed to load dashboard data");
       const data = await res.json();
       const categoryLabels = (data.spendingByCategory ?? []).map(c => c.category);
@@ -451,7 +455,7 @@ renderPieChart(categoryLabels, categoryValues);
           tbody.appendChild(tr);
         });
       }
-      const trendRes = await fetch("/api/dashboard/trend");
+      const trendRes = await fetch("/api/dashboard/trend", { headers: authHeaders });
 if (!trendRes.ok) throw new Error("Failed to load trend data");
 
 const trendData = await trendRes.json();

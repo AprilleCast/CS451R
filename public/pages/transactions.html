@@ -353,7 +353,10 @@
 
     async function loadTransactions() {
       try {
-        const res = await fetch("/api/transactions/all");
+        const token = localStorage.getItem("token");
+        const res = await fetch("/api/transactions/all", {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {}
+        });
         if (!res.ok) throw new Error("Failed to load transactions");
 
         const data = await res.json();
@@ -397,6 +400,11 @@
 
     document.getElementById("txnForm").addEventListener("submit", async function (e) {
       e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/pages/login.html";
+        return;
+      }
 
       const txn = {
         txn_date: document.getElementById("date").value,
@@ -413,7 +421,10 @@
       try {
         const res = await fetch("/api/transactions/add", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify(txn)
         });
 

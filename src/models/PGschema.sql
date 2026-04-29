@@ -30,15 +30,19 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE TABLE IF NOT EXISTS budgets (
   id           SERIAL PRIMARY KEY,
   user_id      INT             NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  category_id  INT             NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
-  month        DATE            NOT NULL,
-  limit_amount DECIMAL(12,2)   NOT NULL,
+  category     VARCHAR(100)    NOT NULL,
+  limit_amount DECIMAL(12,2)   NOT NULL CHECK (limit_amount > 0),
+  timeframe    VARCHAR(20)     NOT NULL CHECK (timeframe IN ('weekly', 'monthly', 'custom')),
+  start_date   DATE            NOT NULL,
+  end_date     DATE            NOT NULL,
   created_at   TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
-  updated_at   TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
-  UNIQUE (user_id, category_id, month)
+  updated_at   TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_transactions_user_date ON transactions(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_transactions_user_type ON transactions(user_id, type);
-CREATE INDEX IF NOT EXISTS idx_budgets_user_month     ON budgets(user_id, month);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_budgets_user_category_period
+  ON budgets (user_id, LOWER(category), timeframe, start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_budgets_user_period
+  ON budgets(user_id, start_date, end_date);

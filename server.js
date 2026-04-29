@@ -13,6 +13,8 @@ const pool = require("./src/db/pool");
 
 // Routes
 const authRoutes = require("./src/routes/authRoutes");
+const budgetRoutes = require("./src/routes/budgetRoutes");
+const transactionRoutes = require("./src/routes/transactionRoutes");
 
 // Middleware
 const errorMiddleware = require("./src/middleware/errorMiddleware");
@@ -47,6 +49,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Auth API
 app.use("/api/auth", authRoutes);
+app.use("/api/budgets", budgetRoutes);
+app.use("/api/transactions", transactionRoutes);
 
 // Simple routes
 app.get("/", (req, res) => {
@@ -69,15 +73,17 @@ app.get("/health/db", async (req, res) => {
 });
 
 // Dashboard trend
-app.get("/api/dashboard/trend", async (req, res) => {
+app.get("/api/dashboard/trend", require("./src/middleware/authMiddleware"), async (req, res) => {
   try {
+    const userId = req.user.id;
     const trend = await pool.query(
       `SELECT to_char(txn_date, 'YYYY-MM-DD') AS day,
-              ABS(SUM(amount)) AS total
+              SUM(ABS(amount)) AS total
        FROM public.transactions
-       WHERE amount < 0
+       WHERE user_id = $1
        GROUP BY txn_date
-       ORDER BY txn_date`
+       ORDER BY txn_date`,
+      [userId]
     );
 
     res.json(
@@ -93,22 +99,26 @@ app.get("/api/dashboard/trend", async (req, res) => {
 });
 
 // Dashboard summary
-app.get("/api/dashboard/summary", async (req, res) => {
+app.get("/api/dashboard/summary", require("./src/middleware/authMiddleware"), async (req, res) => {
   try {
+    const userId = req.user.id;
+
     const total = await pool.query(
-      `SELECT COALESCE(ABS(SUM(amount)), 0) AS total_spent
+      `SELECT COALESCE(SUM(ABS(amount)), 0) AS total_spent
        FROM public.transactions
-       WHERE amount < 0`
+       WHERE user_id = $1`,
+      [userId]
     );
 
     const byCategory = await pool.query(
-      `SELECT c.name AS category, ABS(SUM(t.amount)) AS total
+      `SELECT c.name AS category, SUM(ABS(t.amount)) AS total
        FROM public.transactions t
        LEFT JOIN public.categories c
          ON t.category = c.id
-       WHERE t.amount < 0
+       WHERE t.user_id = $1
        GROUP BY c.name
-       ORDER BY ABS(SUM(t.amount)) DESC`
+       ORDER BY SUM(ABS(t.amount)) DESC`,
+      [userId]
     );
 
     const recent = await pool.query(
@@ -120,8 +130,10 @@ app.get("/api/dashboard/summary", async (req, res) => {
        FROM public.transactions t
        LEFT JOIN public.categories c
          ON t.category = c.id
+       WHERE t.user_id = $1
        ORDER BY t.txn_date DESC, t.id DESC
-       LIMIT 5`
+       LIMIT 5`,
+      [userId]
     );
 
     const totalSpent = Number(total.rows[0].total_spent);
@@ -142,28 +154,6 @@ app.get("/api/dashboard/summary", async (req, res) => {
       spendingByCategory,
       recentTransactions,
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database query failed" });
-  }
-});
-
-// All transactions
-app.get("/api/transactions/all", async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT t.id,
-              t.amount,
-              c.name AS category,
-              to_char(t.txn_date, 'YYYY-MM-DD') AS txn_date,
-              t.description
-       FROM public.transactions t
-       LEFT JOIN public.categories c
-         ON t.category = c.id
-       ORDER BY t.txn_date DESC, t.id DESC`
-    );
-
-    res.json({ transactions: result.rows });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Database query failed" });

@@ -1,5 +1,8 @@
-echo "# Node
+# Node
 node_modules/
 
-# Others
-.env" > .gitignore
+# Environment
+.env
+
+# macOS
+.DS_Store

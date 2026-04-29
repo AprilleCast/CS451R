@@ -181,14 +181,13 @@ const Layout = {
     if (themeBtn) themeBtn.addEventListener("click", () => ThemeManager.toggle());
 
     // Logout
-    
- const logoutBtn = document.querySelector("button#logoutBtn");
-
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    Auth.logout();
-  });
+    const logoutBtn = document.querySelector("button#logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        Auth.logout();
+      });
+    }
 
     // Mobile sidebar
     const hamburger = document.getElementById("hamburger");
@@ -206,6 +205,7 @@ if (logoutBtn) {
         overlay.classList.remove("show");
       });
     }
+
     // User dropdown
     const avatarBtn  = document.getElementById("userAvatar");
     const dropdownEl = document.getElementById("userDropdown");
@@ -216,12 +216,6 @@ if (logoutBtn) {
       });
       document.addEventListener("click", () => dropdownEl.classList.remove("show"));
     }
-    if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    Auth.logout();
-  });
-}
-
   },
 };
 ThemeManager.init();

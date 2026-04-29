@@ -48,22 +48,20 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE TABLE IF NOT EXISTS budgets (
   id            INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id       INT UNSIGNED    NOT NULL,
-  category_id   INT UNSIGNED    NOT NULL,
-  month         DATE            NOT NULL,
-  limit_amount  DECIMAL(12, 2)  NOT NULL,
+  category      VARCHAR(100)    NOT NULL,
+  timeframe     ENUM('weekly', 'monthly', 'custom') NOT NULL,
+  start_date    DATE            NOT NULL,
+  end_date      DATE            NOT NULL,
+  limit_amount  DECIMAL(12, 2)  NOT NULL CHECK (limit_amount > 0),
   created_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-  UNIQUE KEY uq_budget (user_id, category_id, month),
+  UNIQUE KEY uq_budget (user_id, category, timeframe, start_date, end_date),
   CONSTRAINT fk_budget_user
     FOREIGN KEY (user_id) REFERENCES users(id)
-    ON DELETE CASCADE,
-  CONSTRAINT fk_budget_category
-    FOREIGN KEY (category_id) REFERENCES categories(id)
     ON DELETE CASCADE
 );
 
 -- Indexes (For Query speed)
 CREATE INDEX idx_transactions_user_date ON transactions(user_id, date);
 CREATE INDEX idx_transactions_user_type ON transactions(user_id, type);
-CREATE INDEX idx_budgets_user_month     ON budgets(user_id, month);
+CREATE INDEX idx_budgets_user_period    ON budgets(user_id, start_date, end_date);
