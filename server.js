@@ -272,8 +272,99 @@ app.get("/{*splat}", (req, res) => {
 // Global error handler
 app.use(errorMiddleware);
 
+// Auto-create database tables on startup
+async function initDatabase() {
+  try {
+    // Create users table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS public.users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(150) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        theme_preference VARCHAR(10) NOT NULL DEFAULT 'light',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    // Check if 'name' column exists (fix for old schema that used 'full_name')
+    const colCheck = await pool.query(`
+      SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'name'
+    `);
+    if (colCheck.rows.length === 0) {
+      // Old schema detected — try to rename full_name -> name, password_hash -> password
+      try { await pool.query(`ALTER TABLE public.users RENAME COLUMN full_name TO name`); } catch (_) {}
+      try { await pool.query(`ALTER TABLE public.users RENAME COLUMN password_hash TO password`); } catch (_) {}
+      // If columns still don't exist, add them
+      try { await pool.query(`ALTER TABLE public.users ADD COLUMN IF NOT EXISTS name VARCHAR(100) NOT NULL DEFAULT ''`); } catch (_) {}
+      try { await pool.query(`ALTER TABLE public.users ADD COLUMN IF NOT EXISTS password VARCHAR(255) NOT NULL DEFAULT ''`); } catch (_) {}
+      try { await pool.query(`ALTER TABLE public.users ADD COLUMN IF NOT EXISTS theme_preference VARCHAR(10) NOT NULL DEFAULT 'light'`); } catch (_) {}
+      try { await pool.query(`ALTER TABLE public.users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`); } catch (_) {}
+    }
+
+    // Create categories table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS public.categories (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    // Create transactions table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS public.transactions (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+        category INT REFERENCES public.categories(id) ON DELETE SET NULL,
+        amount NUMERIC(12,2) NOT NULL,
+        txn_date DATE NOT NULL,
+        description VARCHAR(255),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    // Create budgets table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS public.budgets (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+        category VARCHAR(100) NOT NULL,
+        limit_amount NUMERIC(12,2) NOT NULL CHECK (limit_amount > 0),
+        timeframe VARCHAR(20) NOT NULL CHECK (timeframe IN ('weekly', 'monthly', 'custom')),
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    // Create indexes (IF NOT EXISTS handles duplicates)
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_transactions_user_date ON public.transactions(user_id, txn_date)`);
+    await pool.query(`
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'uq_budgets_user_category_period') THEN
+          CREATE UNIQUE INDEX uq_budgets_user_category_period ON public.budgets(user_id, LOWER(category), timeframe, start_date, end_date);
+        END IF;
+      END $$;
+    `);
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_budgets_user_period ON public.budgets(user_id, start_date, end_date)`);
+
+    console.log("Database tables initialized successfully.");
+  } catch (error) {
+    console.error("Database initialization error:", error.message);
+    console.error("Make sure PostgreSQL is running and .env is configured correctly.");
+    process.exit(1);
+  }
+}
+
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+initDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 });
