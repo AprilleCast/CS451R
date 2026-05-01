@@ -218,4 +218,4 @@ const Layout = {
     }
   },
 };
-ThemeManager.init();
+document.addEventListener("DOMContentLoaded", () => Layout.init());

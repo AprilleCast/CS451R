@@ -46,8 +46,19 @@ const addTransaction = async (userId, { txnDate, category, description, amount }
   );
   return result.rows[0];
 };
+const deleteTransaction = async (transactionId, userId) => {
+  const result = await pool.query(
+    `DELETE FROM public.transactions
+     WHERE id = $1 AND user_id = $2
+     RETURNING id`,
+    [transactionId, userId]
+  );
+
+  return result.rows[0];
+};
 
 module.exports = {
   getAllByUser,
   addTransaction,
+  deleteTransaction,
 };

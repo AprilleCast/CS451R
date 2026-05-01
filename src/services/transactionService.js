@@ -27,8 +27,12 @@ const addTransaction = async (userId, payload) => {
     amount,
   });
 };
+const deleteTransaction = async (transactionId, userId) => {
+  return transactionRepository.deleteTransaction(transactionId, userId);
+};
 
 module.exports = {
   getAllTransactions,
   addTransaction,
+  deleteTransaction,
 };

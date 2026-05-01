@@ -46,8 +46,37 @@ const createTransaction = async (req, res, next) => {
     return next(error);
   }
 };
+const deleteTransaction = async (req, res, next) => {
+  try {
+    const transactionId = req.params.id;
+    const userId = req.user?.id;
 
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
+    const deleted = await transactionService.deleteTransaction(transactionId, userId);
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Transaction not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Transaction deleted successfully.",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 module.exports = {
   getAllTransactions,
   createTransaction,
+  deleteTransaction,
 };

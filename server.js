@@ -347,7 +347,7 @@ async function initDatabase() {
     await pool.query(`
       DO $$ BEGIN
         IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'uq_budgets_user_category_period') THEN
-          CREATE UNIQUE INDEX uq_budgets_user_category_period ON public.budgets(user_id, LOWER(category), timeframe, start_date, end_date);
+          CREATE UNIQUE INDEX uq_budgets_user_category_period ON public.budgets(user_id, LOWER(name), timeframe, start_date, end_date);
         END IF;
       END $$;
     `);
