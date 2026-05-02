@@ -30,9 +30,13 @@ const addTransaction = async (userId, payload) => {
 const deleteTransaction = async (transactionId, userId) => {
   return transactionRepository.deleteTransaction(transactionId, userId);
 };
+const updateTransaction = async (userId, txnId, data) => {
+  return await transactionRepository.updateTransaction(userId, txnId, data);
+};
 
 module.exports = {
   getAllTransactions,
   addTransaction,
   deleteTransaction,
+  updateTransaction,
 };
