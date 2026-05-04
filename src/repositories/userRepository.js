@@ -54,6 +54,41 @@ const updateTheme = async (id, theme) => {
   return result.rowCount > 0;
 };
 
+const saveResetToken = async (userId, token) => {
+  await pool.query(
+    "DELETE FROM password_resets WHERE user_id = $1", [userId]
+  );
+  await pool.query(
+    `INSERT INTO password_resets (user_id, token, expires_at) 
+     VALUES ($1, $2, NOW() + INTERVAL '15 minutes')`,
+    [userId, token]
+  );
+};
+
+const findResetToken = async (token) => {
+  const { rows } = await pool.query(
+    `SELECT pr.*, u.email FROM password_resets pr
+     JOIN users u ON u.id = pr.user_id
+     WHERE pr.token = $1 AND pr.expires_at > NOW()
+     LIMIT 1`,
+    [token]
+  );
+  return rows[0] || null;
+};
+
+const deleteResetToken = async (token) => {
+  await pool.query(
+    "DELETE FROM password_resets WHERE token = $1", [token]
+  );
+};
+
+const deleteUser = async (id) => {
+  const { rowCount } = await pool.query(
+    "DELETE FROM users WHERE id = $1", [id]
+  );
+  return rowCount > 0;
+};
+
 module.exports = {
   findByEmail,
   findById,
@@ -61,4 +96,8 @@ module.exports = {
   updateProfile,
   updatePassword,
   updateTheme,
+  saveResetToken,
+  findResetToken,
+  deleteResetToken,
+  deleteUser
 };

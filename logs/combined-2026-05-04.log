@@ -1,0 +1,17 @@
+[2026-05-04 18:26:59] [ERROR]: Forgot password controller error
+  Error: userRepository.saveResetToken is not a function
+[2026-05-04 18:27:03] [ERROR]: Forgot password controller error
+  Error: userRepository.saveResetToken is not a function
+[2026-05-04 18:31:47] [INFO]: Password reset email sent
+  to: maisha21030@gmail.com
+[2026-05-04 18:31:47] [INFO]: Password reset email sent
+  userId: 2
+  email: maisha21030@gmail.com
+[2026-05-04 18:32:43] [INFO]: Password reset successful
+  userId: 2
+[2026-05-04 18:32:57] [INFO]: User logged in
+  userId: 2
+  email: maisha21030@gmail.com
+[2026-05-04 18:39:14] [INFO]: User logged in
+  userId: 2
+  email: maisha21030@gmail.com
