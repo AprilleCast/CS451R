@@ -56,9 +56,28 @@ const deleteTransaction = async (transactionId, userId) => {
 
   return result.rows[0];
 };
+const updateTransaction = async (userId, txnId, { txn_date, category, description, amount }) => {
+  const categoryId = await createCategoryIfMissing(userId, category);
 
+  const result = await pool.query(
+    `UPDATE public.transactions
+     SET category = $1,
+         amount = $2,
+         txn_date = $3,
+         description = $4
+     WHERE id = $5 AND user_id = $6`,
+    [categoryId, amount, txn_date, description || null, txnId, userId]
+  );
+
+  if (result.rowCount === 0) {
+    throw new Error("Transaction not found");
+  }
+
+  return result.rows[0];
+};
 module.exports = {
   getAllByUser,
   addTransaction,
   deleteTransaction,
+  updateTransaction,
 };

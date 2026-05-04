@@ -75,8 +75,28 @@ const deleteTransaction = async (req, res, next) => {
     return next(error);
   }
 };
+const updateTransaction = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized." });
+    }
+
+    const txnId = req.params.id;
+
+    await transactionService.updateTransaction(userId, txnId, req.body);
+
+    return res.status(200).json({
+      success: true,
+      message: "Transaction updated",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 module.exports = {
   getAllTransactions,
   createTransaction,
   deleteTransaction,
+  updateTransaction,
 };
