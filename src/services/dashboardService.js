@@ -1,25 +1,9 @@
 const dashboardRepository = require("../repositories/dashboardRepository");
 
-const checkDbHealth = async () => {
-  return await dashboardRepository.checkDbHealth();
-};
-
-const getDashboardSummary = async () => {
-  const total = await dashboardRepository.getTotalSpent();
-  const byCategory = await dashboardRepository.getSpendingByCategory();
-  const recent = await dashboardRepository.getRecentTransactions();
-
-  const totalSpent = Number(total.total_spent);
-
-  const spendingByCategory = byCategory.map((row) => ({
-    category: row.category,
-    total: Number(row.total),
-  }));
-
-  const recentTransactions = recent.map((row) => ({
-    ...row,
-    amount: Number(row.amount),
-  }));
+const getSummary = async (userId) => {
+  const totalSpent = await dashboardRepository.getTotalSpent(userId);
+  const spendingByCategory = await dashboardRepository.getSpendingByCategory(userId);
+  const recentTransactions = await dashboardRepository.getRecentTransactions(userId);
 
   return {
     totalSpent,
@@ -28,7 +12,11 @@ const getDashboardSummary = async () => {
   };
 };
 
+const getTrend = async (userId) => {
+  return dashboardRepository.getSpendingTrend(userId);
+};
+
 module.exports = {
-  checkDbHealth,
-  getDashboardSummary,
+  getSummary,
+  getTrend,
 };

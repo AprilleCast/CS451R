@@ -1,27 +1,26 @@
-
 const dashboardService = require("../services/dashboardService");
 
-const checkDbHealth = async (req, res) => {
+const getSummary = async (req, res, next) => {
   try {
-    const result = await dashboardService.checkDbHealth();
-    res.json(result);
+    const userId = req.user.id;
+    const summary = await dashboardService.getSummary(userId);
+    res.json(summary);
   } catch (error) {
-    console.error("Controller error in checkDbHealth:", error);
-    res.status(500).json({ error: "Database health check failed" });
+    next(error);
   }
 };
 
-const getDashboardSummary = async (req, res) => {
+const getTrend = async (req, res, next) => {
   try {
-    const summary = await dashboardService.getDashboardSummary();
-    res.json(summary);
+    const userId = req.user.id;
+    const trend = await dashboardService.getTrend(userId);
+    res.json(trend);
   } catch (error) {
-    console.error("Controller error in getDashboardSummary:", error);
-    res.status(500).json({ error: "Database query failed" });
+    next(error);
   }
 };
 
 module.exports = {
-  checkDbHealth,
-  getDashboardSummary,
+  getSummary,
+  getTrend,
 };

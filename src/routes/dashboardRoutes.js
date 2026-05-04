@@ -1,9 +1,10 @@
 const express = require("express");
 const dashboardController = require("../controllers/dashboardController");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.get("/health/db", dashboardController.checkDbHealth);
-router.get("/api/dashboard/summary", dashboardController.getDashboardSummary);
+router.get("/summary", authMiddleware, dashboardController.getSummary);
+router.get("/trend", authMiddleware, dashboardController.getTrend);
 
 module.exports = router;
