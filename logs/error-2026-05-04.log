@@ -1,0 +1,4 @@
+[2026-05-04 18:26:59] [ERROR]: Forgot password controller error
+  Error: userRepository.saveResetToken is not a function
+[2026-05-04 18:27:03] [ERROR]: Forgot password controller error
+  Error: userRepository.saveResetToken is not a function

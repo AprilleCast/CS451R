@@ -241,6 +241,19 @@ async function initDatabase() {
       )
     `);
 
+     await pool.query(`
+      CREATE TABLE IF NOT EXISTS public.password_resets (
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        user_id BIGINT NOT NULL,
+        token VARCHAR(255) NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_reset_user
+          FOREIGN KEY (user_id) REFERENCES public.users(id)
+          ON DELETE CASCADE
+  )
+`);
+
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_transactions_user_date
       ON public.transactions(user_id, txn_date)

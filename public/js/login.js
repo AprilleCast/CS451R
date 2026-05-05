@@ -58,14 +58,11 @@ async function handleLogin() {
       Auth.setToken(res.data.token);
       Auth.setUser(res.data.user);
       window.location.href = "/pages/dashboard.html";
-      
     } else {
       UI.showAlert("alertMsg", res.message || "Login failed.", "error");
     }
-  }catch (err) {
-  console.error("LOGIN ERROR:", err);
-  UI.showAlert("alertMsg", err.message || "Something went wrong.", "error");
-
+  } catch (err) {
+    UI.showAlert("alertMsg", "Something went wrong. Please try again.", "error");
   } finally {
     UI.setLoading(btn, false);
   }
