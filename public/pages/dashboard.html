@@ -148,6 +148,105 @@
     font-weight: 700;
     color: var(--navy);
   }
+
+  .dash-sort-select {
+    width: auto;
+    border-radius: 999px;
+    border: 1px solid #dbe2ea;
+    min-height: 36px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1d4ed8;
+    background-color: #eff6ff;
+    padding: 0.3rem 0.9rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.45rem;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 14px;
+    border: 1px solid #dbe2ea;
+    min-height: 48px;
+    background: #fbfdff;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, 0.15);
+    border-color: #93c5fd;
+  }
+
+  .btn-primary {
+    background-color: var(--secondary-blue);
+    border: none;
+    border-radius: 14px;
+    font-weight: 600;
+    min-height: 48px;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--accent-blue);
+  }
+
+  .btn-outline-secondary {
+    border-radius: 14px;
+    min-height: 48px;
+    font-weight: 600;
+    border-color: #dbe2ea;
+    color: var(--muted);
+  }
+
+  .filter-card {
+    background: rgba(239, 246, 255, 0.65);
+    border: 1px solid rgba(59, 130, 246, 0.15) !important;
+  }
+
+  .filter-card:hover {
+    transform: none;
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+  }
+
+  .filter-body {
+    padding: 0.6rem 1rem;
+  }
+
+  .filter-label-col {
+    display: flex;
+    align-items: center;
+    padding-bottom: 0.15rem;
+  }
+
+  .filter-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .filter-label {
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem;
+    color: var(--muted);
+  }
+
+  .filter-input {
+    min-height: unset;
+    border-radius: 10px;
+    font-size: 0.85rem;
+  }
+
+  .filter-btn {
+    border-radius: 10px;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.85rem;
+    min-height: unset;
+  }
 </style>
 </head>
 
@@ -179,6 +278,30 @@
     <div id="lastUpdated" class="fw-semibold">—</div>
   </div>
 </div>
+
+    <!-- Date Range Filter -->
+    <div class="card filter-card mb-4">
+      <div class="card-body filter-body">
+        <div class="row g-2 align-items-end">
+          <div class="col-auto filter-label-col">
+            <i class="bi bi-funnel text-primary me-1"></i>
+            <span class="filter-title">Filter</span>
+          </div>
+          <div class="col-md">
+            <label for="dashStartDate" class="form-label filter-label">Start Date</label>
+            <input type="date" id="dashStartDate" class="form-control form-control-sm filter-input" />
+          </div>
+          <div class="col-md">
+            <label for="dashEndDate" class="form-label filter-label">End Date</label>
+            <input type="date" id="dashEndDate" class="form-control form-control-sm filter-input" />
+          </div>
+          <div class="col-auto d-flex gap-2">
+            <button type="button" id="dashApplyBtn" class="btn btn-primary btn-sm filter-btn">Apply</button>
+            <button type="button" id="dashClearBtn" class="btn btn-outline-secondary btn-sm filter-btn">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Top metrics -->
     <<div class="row g-3 mb-4">
@@ -263,7 +386,13 @@
             <h2 class="h5 mb-0 fw-bold">Recent Transactions</h2>
             <div class="subtle small">Latest spending activity</div>
           </div>
-          <span class="chip"><i class="bi bi-clock-history me-1"></i>Last 5</span>
+          <div class="d-flex align-items-center gap-2">
+            <select id="dashSortBy" class="form-select form-select-sm dash-sort-select" title="Sort transactions by date" aria-label="Sort transactions by date">
+              <option value="date_desc">Newest First</option>
+              <option value="date_asc">Oldest First</option>
+            </select>
+            <span class="chip"><i class="bi bi-clock-history me-1"></i>Recent</span>
+          </div>
         </div>
 
         <div class="table-responsive">
@@ -374,12 +503,49 @@ function renderLineChart(labels, values) {
   });
 }
 
+    let dashboardTxns = [];
+
+    function renderDashboardTransactions() {
+      const sortOrder = document.getElementById("dashSortBy").value;
+      const sorted = [...dashboardTxns].sort((a, b) => {
+        if (sortOrder === "date_asc") return a.txn_date < b.txn_date ? -1 : a.txn_date > b.txn_date ? 1 : 0;
+        return a.txn_date > b.txn_date ? -1 : a.txn_date < b.txn_date ? 1 : 0;
+      });
+
+      const tbody = document.getElementById("transactionsBody");
+      tbody.innerHTML = "";
+
+      if (sorted.length === 0) {
+        document.getElementById("transactionsEmpty").classList.remove("d-none");
+        return;
+      }
+
+      document.getElementById("transactionsEmpty").classList.add("d-none");
+      sorted.forEach(t => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+  <td class="mono">${safeText(t.txn_date)}</td>
+  <td><span class="category-pill">${safeText(t.category)}</span></td>
+  <td>${safeText(t.description)}</td>
+  <td class="text-end mono amount">${money(t.amount)}</td>
+`;
+        tbody.appendChild(tr);
+      });
+    }
+
     async function loadDashboard() {
       const token = localStorage.getItem("token");
       if (!token) { window.location.href = "/pages/login.html"; return; }
       const authHeaders = { "Authorization": "Bearer " + token };
 
-      const res = await fetch("/api/dashboard/summary", { headers: authHeaders });
+      const startDate = document.getElementById("dashStartDate").value;
+      const endDate = document.getElementById("dashEndDate").value;
+      const params = new URLSearchParams();
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
+      const qs = params.toString() ? `?${params.toString()}` : "";
+
+      const res = await fetch(`/api/dashboard/summary${qs}`, { headers: authHeaders });
       if (!res.ok) throw new Error("Failed to load dashboard data");
       const data = await res.json();
       const categoryLabels = (data.spendingByCategory ?? []).map(c => c.category);
@@ -435,27 +601,9 @@ renderPieChart(categoryLabels, categoryValues);
       }
 
       // Transactions table
-      const tbody = document.getElementById("transactionsBody");
-      tbody.innerHTML = "";
-
-      const txns = data.recentTransactions ?? [];
-      if (txns.length === 0) {
-        document.getElementById("transactionsEmpty").classList.remove("d-none");
-      } else {
-        document.getElementById("transactionsEmpty").classList.add("d-none");
-
-        txns.forEach(t => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-  <td class="mono">${safeText(t.txn_date)}</td>
-  <td><span class="category-pill">${safeText(t.category)}</span></td>
-  <td>${safeText(t.description)}</td>
-  <td class="text-end mono amount">${money(t.amount)}</td>
-`;
-          tbody.appendChild(tr);
-        });
-      }
-      const trendRes = await fetch("/api/dashboard/trend", { headers: authHeaders });
+      dashboardTxns = data.recentTransactions ?? [];
+      renderDashboardTransactions();
+      const trendRes = await fetch(`/api/dashboard/trend${qs}`, { headers: authHeaders });
 if (!trendRes.ok) throw new Error("Failed to load trend data");
 
 const trendData = await trendRes.json();
@@ -469,6 +617,18 @@ renderLineChart(trendLabels, trendValues);
     loadDashboard().catch(err => {
       alert("Dashboard failed to load: " + err.message);
       console.error(err);
+    });
+
+    document.getElementById("dashSortBy").addEventListener("change", renderDashboardTransactions);
+
+    document.getElementById("dashApplyBtn").addEventListener("click", () => {
+      loadDashboard().catch(err => { alert("Failed to reload: " + err.message); console.error(err); });
+    });
+
+    document.getElementById("dashClearBtn").addEventListener("click", () => {
+      document.getElementById("dashStartDate").value = "";
+      document.getElementById("dashEndDate").value = "";
+      loadDashboard().catch(err => { alert("Failed to reload: " + err.message); console.error(err); });
     });
   </script>
 

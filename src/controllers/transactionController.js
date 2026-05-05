@@ -17,7 +17,12 @@ const getAllTransactions = async (req, res, next) => {
       return res.status(401).json({ success: false, message: "Unauthorized." });
     }
 
-    const rows = await transactionService.getAllTransactions(userId);
+    const filters = {
+      startDate: req.query.startDate || null,
+      endDate: req.query.endDate || null,
+      sortby: req.query.sortby || "date_desc",
+    };
+    const rows = await transactionService.getAllTransactions(userId, filters);
     return res.status(200).json({ transactions: rows });
   } catch (error) {
     return next(error);

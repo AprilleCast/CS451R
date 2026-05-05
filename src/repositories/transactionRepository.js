@@ -1,8 +1,14 @@
 const pool = require("../db/pool");
 
-const getAllByUser = async (userId) => {
-  const result = await pool.query(
-    `SELECT t.id,
+const getAllByUser = async (userId, options = {}) => {
+  const {
+    startDate,
+    endDate,
+    sortby = "date_desc",
+  } = options;
+  const values = [userId];
+  let query = `
+    SELECT t.id,
             t.amount,
             c.name AS category,
             to_char(t.txn_date, 'YYYY-MM-DD') AS txn_date,
@@ -11,10 +17,32 @@ const getAllByUser = async (userId) => {
      LEFT JOIN public.categories c
        ON t.category = c.id
      WHERE t.user_id = $1
-     ORDER BY t.txn_date DESC, t.id DESC`,
-    [userId]
-  );
-  return result.rows;
+    `;
+  if (startDate) {
+    query += " AND t.txn_date >= $2";
+    values.push(startDate);
+  }
+  if (endDate) {
+    query += ` AND t.txn_date <= $${values.length + 1}`;
+    values.push(endDate);
+  }
+  if (sortby === "date_asc") {
+    query += ` ORDER BY t.txn_date ASC, t.id ASC`;
+  } else if (sortby === "amount_high") {
+    query += ` ORDER BY t.amount DESC, t.id DESC`;
+  } else if (sortby === "amount_low") {
+    query += ` ORDER BY t.amount ASC, t.id ASC`;
+  } else if (sortby === "category") {
+    query += ` ORDER BY c.name ASC, t.id ASC`;
+  } else {
+    query += ` ORDER BY t.txn_date DESC, t.id DESC`;
+  }
+  const result = await pool.query(query, values);
+  return result.rows.map(row => ({
+    ...row,
+    amount: Number(row.amount),
+    category: row.category || "Other",
+  }));
 };
 
 const createCategoryIfMissing = async (userId, categoryName) => {

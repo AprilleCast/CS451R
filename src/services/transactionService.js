@@ -1,7 +1,7 @@
 const transactionRepository = require("../repositories/transactionRepository");
 
-const getAllTransactions = async (userId) => {
-  return transactionRepository.getAllByUser(userId);
+const getAllTransactions = async (userId, filters = {}) => {
+  return transactionRepository.getAllByUser(userId, filters);
 };
 
 const addTransaction = async (userId, payload) => {

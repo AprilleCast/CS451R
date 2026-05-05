@@ -207,6 +207,47 @@
       padding: 1rem 0 0;
     }
 
+    .filter-card {
+      background: rgba(239, 246, 255, 0.65);
+      border: 1px solid rgba(59, 130, 246, 0.15) !important;
+    }
+
+    .filter-body {
+      padding: 0.6rem 1rem;
+    }
+
+    .filter-label-col {
+      display: flex;
+      align-items: center;
+      padding-bottom: 0.15rem;
+    }
+
+    .filter-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filter-label {
+      font-size: 0.75rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .filter-input {
+      min-height: unset;
+      border-radius: 10px;
+      font-size: 0.85rem;
+    }
+
+    .filter-btn {
+      border-radius: 10px;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.85rem;
+      min-height: unset;
+    }
+
     @media (max-width: 768px) {
       .page-title {
         font-size: 1.6rem;
@@ -307,6 +348,39 @@
         </form>
       </div>
     </div>
+    <!-- Filter & Sort -->
+    <div class="card filter-card mb-4">
+      <div class="card-body filter-body">
+        <div class="row g-2 align-items-end">
+          <div class="col-auto filter-label-col">
+            <i class="bi bi-funnel text-primary me-1"></i>
+            <span class="filter-title">Filter</span>
+          </div>
+          <div class="col-md">
+            <label for="filterStartDate" class="form-label filter-label">Start Date</label>
+            <input type="date" id="filterStartDate" class="form-control form-control-sm filter-input" />
+          </div>
+          <div class="col-md">
+            <label for="filterEndDate" class="form-label filter-label">End Date</label>
+            <input type="date" id="filterEndDate" class="form-control form-control-sm filter-input" />
+          </div>
+          <div class="col-md">
+            <label for="sortBy" class="form-label filter-label">Sort By</label>
+            <select id="sortBy" class="form-select form-select-sm filter-input">
+              <option value="date_desc">Date (Newest First)</option>
+              <option value="date_asc">Date (Oldest First)</option>
+              <option value="amount_high">Amount (High to Low)</option>
+              <option value="amount_low">Amount (Low to High)</option>
+              <option value="category">Category (A-Z)</option>
+            </select>
+          </div>
+          <div class="col-auto d-flex gap-2">
+            <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-sm filter-btn">Apply</button>
+            <button type="button" id="clearFiltersBtn" class="btn btn-outline-secondary btn-sm filter-btn">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Transaction History -->
     <div class="card">
@@ -359,8 +433,18 @@
     async function loadTransactions() {
       try {
         const token = localStorage.getItem("token");
-    
-        const res = await fetch("/api/transactions/all", {
+        const startDate = document.getElementById("filterStartDate").value;
+        const endDate = document.getElementById("filterEndDate").value;
+        const sortby = document.getElementById("sortBy").value;
+
+        const params = new URLSearchParams();
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
+        if (sortby) params.append("sortby", sortby);
+
+
+        
+        const res = await fetch(`/api/transactions/all?${params.toString()}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
     
@@ -525,6 +609,15 @@
         console.error(err);
         alert(err.message);
       }
+    });
+    document.getElementById("applyFiltersBtn").addEventListener("click", function() {
+      loadTransactions();
+    });
+    document.getElementById("clearFiltersBtn").addEventListener("click", function() {
+      document.getElementById("filterStartDate").value = "";
+      document.getElementById("filterEndDate").value = "";
+      document.getElementById("sortBy").value = "date_desc";
+      loadTransactions();
     });
     
     // ---------- Init ----------
