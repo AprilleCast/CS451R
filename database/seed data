@@ -1,0 +1,48 @@
+– ============================================================
+– BudgeIt Demo Seed Data
+– Run schema.sql first, then register a user through the app.
+– Replace user_id = 1 with your actual user’s ID if different.
+– ============================================================
+
+– CATEGORIES
+INSERT INTO categories (user_id, name) VALUES
+(1, ‘Groceries’),
+(1, ‘Dining’),
+(1, ‘Rent’),
+(1, ‘Transportation’),
+(1, ‘Entertainment’),
+(1, ‘Shopping’),
+(1, ‘Utilities’),
+(1, ‘Income’);
+
+– TRANSACTIONS
+INSERT INTO transactions (user_id, category, txn_date, description, amount) VALUES
+(1, 8, ‘2026-04-01’, ‘Bi-weekly paycheck’, 1850.00),
+(1, 8, ‘2026-04-15’, ‘Bi-weekly paycheck’, 1850.00),
+(1, 8, ‘2026-04-10’, ‘Freelance project’, 350.00),
+(1, 3, ‘2026-04-01’, ‘April rent’, -1100.00),
+(1, 1, ‘2026-04-03’, ‘Weekly grocery run’, -87.42),
+(1, 4, ‘2026-04-06’, ‘Gas fill-up’, -48.20),
+(1, 2, ‘2026-04-08’, ‘Dinner with friends’, -34.50),
+(1, 7, ‘2026-04-10’, ‘Electric bill’, -72.18),
+(1, 1, ‘2026-04-12’, ‘Grocery run’, -64.33),
+(1, 5, ‘2026-04-14’, ‘Movie tickets’, -28.00),
+(1, 2, ‘2026-04-17’, ‘Lunch on campus’, -12.75),
+(1, 1, ‘2026-04-19’, ‘Weekend groceries’, -91.10),
+(1, 4, ‘2026-04-22’, ‘Uber to airport’, -24.60),
+(1, 5, ‘2026-04-25’, ‘Streaming subscriptions’, -35.97),
+(1, 2, ‘2026-04-28’, ‘Coffee shop’, -9.40),
+(1, 8, ‘2026-05-01’, ‘Bi-weekly paycheck’, 1850.00),
+(1, 3, ‘2026-05-01’, ‘May rent’, -1100.00),
+(1, 1, ‘2026-05-02’, ‘Weekly grocery run’, -79.85),
+(1, 7, ‘2026-05-03’, ‘Internet bill’, -59.99),
+(1, 4, ‘2026-05-04’, ‘Gas fill-up’, -51.40),
+(1, 2, ‘2026-05-04’, ‘Brunch’, -22.30);
+
+– BUDGETS
+INSERT INTO budgets (user_id, category, limit_amour, timeframe, start_date, end_date) VALUES
+(1, ‘Groceries’,      250.00, ‘monthly’, ‘2026-05-01’, ‘2026-05-31’),
+(1, ‘Dining’,          80.00, ‘monthly’, ‘2026-05-01’, ‘2026-05-31’),
+(1, ‘Transportation’, 120.00, ‘monthly’, ‘2026-05-01’, ‘2026-05-31’),
+(1, ‘Entertainment’,   60.00, ‘monthly’, ‘2026-05-01’, ‘2026-05-31’),
+(1, ‘Utilities’,      150.00, ‘monthly’, ‘2026-05-01’, ‘2026-05-31’);
