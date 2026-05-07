@@ -1,0 +1,43 @@
+– ============================================================
+– BudgeIt Database Schema
+– Database: budget_app
+– ============================================================
+
+CREATE TABLE users (
+id          SERIAL PRIMARY KEY,
+name        VARCHAR(100)  NOT NULL,
+email       VARCHAR(150)  NOT NULL,
+password    VARCHAR(255)  NOT NULL,
+theme_preference VARCHAR(10) DEFAULT ‘light’,
+updated_at  TIMESTAMPTZ   DEFAULT now(),
+created_at  TIMESTAMPTZ   DEFAULT now()
+);
+
+CREATE TABLE categories (
+id          SERIAL PRIMARY KEY,
+user_id     INT           NOT NULL,
+name        VARCHAR(100)  NOT NULL,
+created_at  TIMESTAMPTZ   DEFAULT now()
+);
+
+CREATE TABLE transactions (
+id          SERIAL PRIMARY KEY,
+user_id     INT           NOT NULL,
+category    INT,
+amount      NUMERIC(12,2) NOT NULL,
+txn_date    DATE          NOT NULL,
+description VARCHAR(255),
+created_at  TIMESTAMPTZ   DEFAULT now()
+);
+
+CREATE TABLE budgets (
+id           SERIAL PRIMARY KEY,
+user_id      INT           NOT NULL,
+category     VARCHAR(100)  NOT NULL,
+limit_amour  NUMERIC(12,2) NOT NULL,
+timeframe    VARCHAR(20),
+start_date   DATE,
+end_date     DATE,
+created_at   TIMESTAMPTZ   DEFAULT now(),
+updated_at   TIMESTAMPTZ   DEFAULT now()
+);
